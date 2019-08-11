@@ -1,1 +1,11 @@
 
+
+
+
+
+## 通过application.yml配置日志
+logging:
+  path: /
+  file: spring.log
+  level:
+    root: debug
