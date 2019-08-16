@@ -19,14 +19,13 @@ public class Main {
         SLF4JBridgeHandler.install();
         //简单格式的Formatter
         SimpleFormatter sf = new SimpleFormatter();
-        //xml格式的formatter
+        //xml格式的formatter || fh.setFormatter(xf)
         XMLFormatter xf = new XMLFormatter();
 
         //输出到文件的hander,指定日志输出级别为ALL
         FileHandler fh = new FileHandler("jul_study.log");
         fh.setLevel(Level.ALL);
         fh.setFormatter(sf);
-//        fh.setFormatter(xf);
 
         //输出到控制台的handler,指定日志输出级别为INFO
         ConsoleHandler ch = new ConsoleHandler();
@@ -34,9 +33,12 @@ public class Main {
 
         //获取logger实例，相同名的只能生成一个实例
         Logger logger = Logger.getLogger("javaLog");
-        logger.addHandler(fh);   //添加输出handler
-        logger.addHandler(ch);   //添加输出handler
-        logger.setLevel(Level.ALL);  //指定logger日志级别
+        //添加输出handler
+        logger.addHandler(fh);
+        //添加输出handler
+        logger.addHandler(ch);
+        //指定logger日志级别
+        logger.setLevel(Level.ALL);
 
         //日志输出简写形式，有不同的级别，可带参数，其它类似
         logger.log(Level.INFO, "this is a info, {0}", "p1");
@@ -45,7 +47,8 @@ public class Main {
         logger.log(Level.FINE, "this is a fine");
         logger.log(Level.FINEST, "this is a finest");
         logger.log(Level.CONFIG, "this is a config");
-        logger.log(Level.INFO, "this is a info", new Exception("my excep")); //带异常输出
+        //带异常输出
+        logger.log(Level.INFO, "this is a info", new Exception("my excep"));
 
         //日志输出简写形式，有不同的级别
         logger.severe("severe log");
@@ -56,6 +59,6 @@ public class Main {
         logger.finer("finer log");
         logger.finest("finest log");
 
-        log.error("Slf4j日志打印{}",Main.class);
+        log.error("Slf4j日志打印{}", Main.class);
     }
 }
