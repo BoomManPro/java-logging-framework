@@ -1,8 +1,18 @@
+spring:
+  application:
+    name: spring-boot-log4j2
 
 
-## 查看是否有效
-logging:
-  path: /
-  file: spring.log
-  level:
-    root: debug
+
+
+
+
+
+## tomcat日志打印
+server:
+  tomcat:
+    accesslog:
+      enabled: true
+      pattern: "%t %a %r %s (%D ms)"
+    basedir: ./data/accesslogs/${spring.application.name}
+  port: 8080

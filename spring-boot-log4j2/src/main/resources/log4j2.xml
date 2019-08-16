@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configuration 中的 status 的级别指的是 log4j2 本身打印的日志级别 -->
+<Configuration status="warn" name="MyApp" monitorInterval="30">
+    <appenders>
+        <console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d][%t][%p][%l] %m%n"/>
+        </console>
+    </appenders>
+    <loggers>
+        <root level="info">
+            <AppenderRef ref="CONSOLE"/>
+        </root>
+    </loggers>
+</Configuration>
