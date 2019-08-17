@@ -8,7 +8,27 @@
         </encoder>
     </appender>
 
-    <root level="INFO">
+
+<!--    <appender name="logstash"-->
+<!--              class="net.logstash.logback.appender.LogstashAccessTcpSocketAppender">-->
+<!--        <destination>127.0.0.1:8888</destination>-->
+<!--        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
+<!--            <providers>-->
+<!--                <timestamp/>-->
+<!--                <version/>-->
+<!--                <message/>-->
+<!--                <loggerName/>-->
+<!--                <threadName/>-->
+<!--                <logLevel/>-->
+<!--                <callerData/>-->
+<!--            </providers>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+
+    <root level="trace">
         <appender-ref ref="STDOUT" />
+
+        <appender-ref ref="logstash"/>
     </root>
 </configuration>

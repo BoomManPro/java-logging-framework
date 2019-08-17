@@ -38,6 +38,12 @@
             <artifactId>lombok</artifactId>
             <version>1.18.8</version>
         </dependency>
+<!--        &lt;!&ndash; Logstash encoder &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>net.logstash.logback</groupId>-->
+<!--            <artifactId>logstash-logback-encoder</artifactId>-->
+<!--            <version>6.1</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
