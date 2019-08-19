@@ -28,6 +28,14 @@ spring boot  debug日志 可以通过那些方式控制
 
 以下以slf4j整合logback举例
 
+
+## 配置文件查找
+
+配置文件优先级
+
+
+
+
 ## slf4j + logback是如何绑定的
 
 ```java
