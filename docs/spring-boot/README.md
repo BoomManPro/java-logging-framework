@@ -1,3 +1,25 @@
+## 配置文件
+
+### 如何放,放在哪里 ?
+
+Spring Boot的核心就是简化配置,约定优于配置。但是如何查找到相关配置呢?
+
+推荐阅读[官方文档](https://docs.spring.io/spring-boot/docs/2.1.0.RELEASE/reference/htmlsingle/#boot-features-custom-log-configuration)
+logback: logback-spring.xml, logback-spring.groovy, logback.xml, or logback.groovy
+
+log4j2: log4j2-spring.xml or log4j2.xml
+
+也可以参照相关代码:
+
+log4j2-config.png
+
+logback-config.png
+
+### Spring Boot 推荐配置方式 ?
+
+When possible, we recommend that you use the -spring variants for your logging configuration (for example, logback-spring.xml rather than logback.xml). If you use standard configuration locations, Spring cannot completely control log initialization.
+
+
 ## Spring Boot日志
 
 Spring Boot项目有哪些日志 可以打那些日志
@@ -29,9 +51,21 @@ spring boot  debug日志 可以通过那些方式控制
 以下以slf4j整合logback举例
 
 
-## 配置文件查找
 
-配置文件优先级
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
