@@ -24,25 +24,46 @@ When possible, we recommend that you use the -spring variants for your logging c
 
 Spring Boot项目有哪些日志 可以打那些日志
 
-tomcat的日志有哪些 
+1.程序日志(使用logging框架打印)
 
-access log
+2.容器日志Access Log (内嵌Tomcat日志)
 
-等
-
-
-spring boot  debug日志 可以通过那些方式控制
+3.日志框架启动日志(一般级别为info||warn)
 
 
+以tomcat日志配置为例
+
+tomcat-log.png
+
+参考文档:[Configure Access Logging](https://docs.spring.io/spring-boot/docs/2.1.0.RELEASE/reference/htmlsingle/#howto-configure-accesslogs)
+
+
+
+## spring boot 日志 可以通过那些方式控制
+
+1.application.yml 中的logging.level
+
+2.logging.config
+
+## 日志打印
+
+
+
+## logger name的作用
 
 如何快速定位错误 如何更清晰打印出日志
 
+配置log中的name
 
-1.日志框架为何能在控制台输出信息
+## 日志框架为何能在控制台输出信息
 
-2.spring boot是如何把日志整合在一起的
+ch.qos.logback.core.ConsoleAppender
 
-3.SLF4J 的相关整合
+
+## spring boot是如何把日志整合在一起的
+
+
+
 
 ## SLF4J和其他日志框架的整合
 
