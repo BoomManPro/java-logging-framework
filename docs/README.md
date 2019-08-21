@@ -7,7 +7,18 @@ Apache Commons Logging,又名JakartaCommons Logging (JCL) 也是spring自身在�
 JCL诞生的初衷是因为Java自身的一些包用了JUL，而Log4j用户使用的有很多，那么JCL就是提供一套API来实现不同Logger之间的切换。
 
 
-Apache Commons包中的一个，包含了日志功能，必须使用的jar包。这个包本身包含了一个Simple Logger，但是功能很弱。在运行的时候它会先在CLASSPATH找log4j，如果有，就使用log4j，如果没有，就找JDK1.4带的 java.util.logging，如果也找不到就用Simple Logger。commons-logging.jar的出现是一个历史的的遗留的遗憾，当初Apache极力游说Sun把log4j加入JDK1.4， 然而JDK1.4项目小组已经接近发布JDK1.4产品的时间了，因此拒绝了Apache的要求，使用自己的java.util.logging，这个包 的功能比log4j差的很远，性能也一般。后来Apache就开发出来了commons-logging.jar用来兼容两个logger。因此用 commons-logging.jar写的log程序，底层的Logger是可以切换的，你可以选择log4j，java.util.logging或 者它自带的Simple Logger。不过我仍然强烈建议使用log4j，因为log4j性能很高，log输出信息时间几乎等于System.out，而处理一条log平均只需 要5us。你可以在Hibernate的src目录下找到Hibernate已经为你准备好了的log4j的配置文件，你只需要到Apache 网站去下载log4j就可以了。commons-logging.jar也是必须的jar包。 
+Apache Commons包中的一个，包含了日志功能，必须使用的jar包。这个包本身包含了一个Simple Logger，但是功能很弱。
+在运行的时候它会先在CLASSPATH找log4j，如果有，就使用log4j，如果没有，就找JDK1.4带的 java.util.logging，如果也找不到就用Simple Logger。
+commons-logging.jar的出现是一个历史的的遗留的遗憾，当初Apache极力游说Sun把log4j加入JDK1.4， 然而JDK1.4项目小组已经接近发布JDK1.4产品的时间了
+，因此拒绝了Apache的要求，使用自己的java.util.logging，这个包 的功能比log4j差的很远，性能也一般。
+后来Apache就开发出来了commons-logging.jar用来兼容两个logger。
+因此用 commons-logging.jar写的log程序，底层的Logger是可以切换的，
+你可以选择log4j，java.util.logging或 者它自带的Simple Logger。不过我仍然强烈建议使用log4j，
+因为log4j性能很高，log输出信息时间几乎等于System.out，而处理一条log平均只需 要5us。
+你可以在Hibernate的src目录下找到Hibernate已经为你准备好了的log4j的配置文件，你只需要到Apache 网站去下载log4j就可以了。
+commons-logging.jar也是必须的jar包。 
+
+
 Apache通用日志包提供一组通用的日志接口,用户可以自由选择实现日志接口的第三方软件
 通用日志目前支持以下日志实现
 Log4j日志器
@@ -51,9 +62,16 @@ Log4j2是Log4j的升级，它比其前身Log4j 1.x提供了重大改进，并提
 jboss logging
 
 
-
+Log4j
 最先出现的是apache开源社区的log4j，这个日志确实是应用最广泛的日志工具，成为了java日志的事实上的标准。然而，当时Sun公司在jdk1.4中增加了JUL日志实现，企图对抗log4j，但是却造成了混乱，这个也是被人诟病的一点。当然也有其他日志工具的出现，这样必然造成开发者的混乱，因为这些日志系统互相没有关联，替换和统一也就变成了比较棘手的一件事。想象下你的应用使用log4j，然后使用了一个其他团队的库，他们使用了JUL，你的应用就得使用两个日志系统了，然后又有第二个库出现了，使用了simplelog。这个时候估计让你崩溃了，这是要闹哪样？这个状况交给你来想想办法，你该如何解决呢？进行抽象，抽象出一个接口层，对每个日志实现都适配或者转接，这样这些提供给别人的库都直接使用抽象层即可。不错，开源社区提供了commons-logging抽象，被称为JCL，也就是日志框架了，确实出色地完成了兼容主流的日志实现（log4j、JUL、simplelog），基本一统江湖，就连顶顶大名的spring也是依赖了JCL。看起来事物确实是美好，但是美好的日子不长，接下来另一个优秀的日志框架slf4j的加入导致了更加混乱的场面。比较巧的是slf4j的作者(Ceki Gülcü)就是log4j的作者，他觉得JCL不够优秀，所以他要自己搞一套更优雅的出来，于是slf4j日志体系诞生了，并为slf4j实现了一个亲子——logback，确实更加优雅，但是由于之前很多代码库已经使用JCL，虽然出现slf4j和JCL之间的桥接转换，但是集成的时候问题依然多多，对很多新手来说确实会很懊恼，因为比单独的log4j时代“复杂”多了，可以关注下这个，抱怨声确实很多。到此本来应该完了，但是Ceki Gülcü觉得还是得回头拯救下自己的“大阿哥”——log4j，于是log4j2诞生了，同样log4j2也参与到了slf4j日志体系中，想必将来会更加混乱。接下来详细解读日志系统的配合使用问题。
 
+在JDK 1.3及以前，Java打日志依赖System.out.println(), System.err.println()或者e.printStackTrace()，Debug日志被写到STDOUT流，错误日志被写到STDERR流。这样打日志有一个非常大的缺陷，即无法定制化，且日志粒度不够细。
+于是， Gülcü 于2001年发布了Log4j，后来成为Apache 基金会的顶级项目。Log4j 在设计上非常优秀，对后续的 Java Log 框架有长久而深远的影响，它定义的Logger、Appender、Level等概念如今已经被广泛使用。Log4j 的短板在于性能，在Logback 和 Log4j2 出来之后，Log4j的使用也减少了。
+
+J.U.L
+受Logj启发，Sun在Java1.4版本中引入了java.util.logging，但是j.u.l功能远不如log4j完善，开发者需要自己编写Appenders（Sun称之为Handlers），且只有两个Handlers可用（Console和File），j.u.l在Java1.5以后性能和可用性才有所提升。
+
+https://www.cnblogs.com/caoweixiong/p/11285748.html
 ## 日志自动清理
 
 
