@@ -63,6 +63,12 @@ ch.qos.logback.core.ConsoleAppender
 ## spring boot是如何把日志整合在一起的
 
 
+## 知识扩展
+
+Tomcat和Spring之间的关系 
+
+Spring Boot 和 embedded servlet container
+
 
 
 ## SLF4J和其他日志框架的整合
