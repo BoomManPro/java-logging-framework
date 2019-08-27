@@ -79,6 +79,23 @@ Spring Boot 和 embedded servlet container
 
 
 
+## 常见的Appender
+
+console
+
+roleback
+
+mysql
+mongodb
+elk socket
+
+
+## 常见Layout中的相关参数
+
+Layout有哪几种 json string xml 等
+
+及相关格式化
+
 
 
 
