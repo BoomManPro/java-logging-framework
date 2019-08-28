@@ -10,6 +10,7 @@
     * [alibaba-p3c](extend/alibaba-p3c.md)
     * [spring-boot](extend/spring-boot.md)
     * [异常跟踪](extend/trace-exception.md)
+    * [日志规范](extend/logging-standard.md)
 * [个人介绍](personal/README.md)
 
 - **Links**
