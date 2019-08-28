@@ -5,6 +5,11 @@
     * [logback](spring-boot/logback.md)
     * [log4j2](spring-boot/log4j2.md)
     * [ELK](spring-boot/elk.md)
+* [扩展资料](extend/README.md)
+    * [Java历史](extend/java-history.md)
+    * [alibaba-p3c](extend/alibaba-p3c.md)
+    * [spring-boot](extend/spring-boot.md)
+    * [异常跟踪](extend/trace-exception.md)
 * [个人介绍](personal/README.md)
 
 - **Links**
