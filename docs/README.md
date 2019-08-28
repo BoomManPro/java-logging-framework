@@ -16,9 +16,9 @@
 
 - Java 日志演化历史
 
-- 项目中日志记录遵守哪些原则
-
 - Spring Boot 项目集成日志框架实战
+
+- 项目中日志记录遵守哪些原则
 
 - 一个推荐的项目 Java 日志实例
 
@@ -214,6 +214,10 @@ SLF4J	http://www.slf4j.org
 logback	http://logback.qos.ch
 Log4j2	https://logging.apache.org/log4j/2.x/
 
+
+## Spring Boot 集成日志框架
+
+
 ##  日志规范 
 
 一个在生产环境里运行的程序如果没有日志是很让维护者提心吊胆的，有太多杂乱又无意义的日志也是令人伤神。程序出现问题时候，从日志里如果发现不了问题可能的原因是很令人受挫的。本文想讨论的是如何在Java程序里写好日志。
@@ -229,10 +233,6 @@ Link:
 - Alibaba-p3c
 
 - 日志实战规范建议    
-
-
-
-## Spring Boot 集成日志框架
 
 
 ## 一个推荐的项目 Java 日志实例
