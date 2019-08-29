@@ -1,8 +1,12 @@
+# Spring Boot + Logback
+
+## Quick Start
+
+在SpringBoot从1.4版本开始，内置的日志框架就是Logback,所以我们创建的是1.4+的Spring Boot项目无需引入Logback依赖，直接使用日志框架。
 
 
 
-
-
+Link [官方文档](https://docs.spring.io/spring-boot/docs/2.1.0.RELEASE/reference/htmlsingle/#boot-features-logback-extensions)
 
 
 ## Logback介绍
@@ -16,118 +20,36 @@ Logback是由log4j创始人设计的一个开源日志组件。LogBack被分为3
 3. logback-access:为了集成Servlet环境而准备的，可提供HTTP-access的日志接口。
 ```
 
-Logback是要与SLF4J结合起来。这两个组件的官方网站如下：
-logback官方网站:  logback官方网站 https://logback.qos.ch/
-SLF4J官方网站：   SLF4J官方网站 https://www.slf4j.org/
+一般来说我们使用Logback是基于Slf4j接口进行使用。
+
+![slf4j-logger-factory](https://raw.githubusercontent.com/BoomManPro/java-logging-framework/master/docs/stastic/images/slf4j-logger-factory.png)
+
+
+工具 | 官方网站
+-|-|
+SLF4J | 	[http://www.slf4j.org](http://www.slf4j.org) | 
+logback | [http://logback.qos.ch](http://logback.qos.ch) | 
+
 
 Slf4j：简单日志门面(Simple Logging Facade for Java)，不是具体的日志解决方案，它只服务于各种各样的日志系统。
 在使用SLF4J的时候，不需要在代码中或配置文件中指定你打算使用那个具体的日志系统。
 
 
+## 为什么使用logback
+
+logback具有以下优点：
+
+内核重写、测试充分、初始化内存加载更小，这一切让logback性能和log4j相比有诸多倍的提升
+logback非常自然地直接实现了slf4j，这个严格来说算不上优点，只是这样，再理解slf4j的前提下会很容易理解logback，也同时很容易用其他日志框架替换logbac
+logback有比较齐全的200多页的文档
+logback当配置文件修改了，支持自动重新加载配置文件，扫描过程快且安全，它并不需要另外创建一个扫描线程
+支持自动去除旧的日志文件，可以控制已经产生日志文件的最大数量
+总而言之，如果大家的项目里面需要选择一个日志框架，那么我个人非常建议使用logback。
 
 
-## logback对配置文件的加载
+## 非Spring Boot 使用步骤
 
-```java
-1. getSingleton()方法获取logback实例对象，说明在对象之前已经加载了相关的配置文件，跟进 StaticLoggerBinder
-    static {
-        // 初始化
-        SINGLETON.init();
-    }
-
-    private boolean initialized = false;
-    private LoggerContext defaultLoggerContext = new LoggerContext();
-    private final ContextSelectorStaticBinder contextSelectorBinder = ContextSelectorStaticBinder.getSingleton();
-
-    private StaticLoggerBinder() {
-        defaultLoggerContext.setName(CoreConstants.DEFAULT_CONTEXT_NAME);
-    }
-
-    public static StaticLoggerBinder getSingleton() {
-        return SINGLETON;
-    }
-    
-2. 查看 init()
-    /**
-     * Package access for testing purposes.
-     */
-    void init() {
-        try {
-            try {
-                // 上下文初始化环境 
-                new ContextInitializer(defaultLoggerContext).autoConfig();
-            } catch (JoranException je) {
-                Util.report("Failed to auto configure default logger context", je);
-            }
-            // logback-292
-            if (!StatusUtil.contextHasStatusListener(defaultLoggerContext)) {
-                StatusPrinter.printInCaseOfErrorsOrWarnings(defaultLoggerContext);
-            }
-            contextSelectorBinder.init(defaultLoggerContext, KEY);
-            initialized = true;
-        } catch (Throwable t) {
-            // we should never get here
-            Util.report("Failed to instantiate [" + LoggerContext.class.getName() + "]", t);
-        }
-    }
-    
-3. 跟进autoConfig()
-    public void autoConfig() throws JoranException {
-        StatusListenerConfigHelper.installIfAsked(loggerContext);
-        // 寻找默认配置文件
-        URL url = findURLOfDefaultConfigurationFile(true);
-        if (url != null) {
-            configureByResource(url);
-        } else {
-            Configurator c = EnvUtil.loadFromServiceLoader(Configurator.class);
-            if (c != null) {
-                try {
-                    c.setContext(loggerContext);
-                    c.configure(loggerContext);
-                } catch (Exception e) {
-                    throw new LogbackException(String.format("Failed to initialize Configurator: %s using ServiceLoader", c != null ? c.getClass()
-                                    .getCanonicalName() : "null"), e);
-                }
-            } else {
-                // 没有找到配置文件，则使用默认的配置器，那么日志只会打印在控制台
-                BasicConfigurator basicConfigurator = new BasicConfigurator();
-                basicConfigurator.setContext(loggerContext);
-                basicConfigurator.configure(loggerContext);
-            }
-        }
-    }
-    
-4. findURLOfDefaultConfigurationFile() logback配置文件加载规则
-    public URL findURLOfDefaultConfigurationFile(boolean updateStatus) {
-        // 获取当前实例的类加载器，目的是在classpath下寻找配置文件
-        ClassLoader myClassLoader = Loader.getClassLoaderOfObject(this);
-        // 先找logback.configurationFile文件
-        URL url = findConfigFileURLFromSystemProperties(myClassLoader, updateStatus);
-        if (url != null) {
-            return url;
-        }
-        // logback.configurationFile文件没找到，再找logback.groovy
-        url = getResource(GROOVY_AUTOCONFIG_FILE, myClassLoader, updateStatus);
-        if (url != null) {
-            return url;
-        }
-        // logback.groovy没找到，再找logback-test.xml
-        url = getResource(TEST_AUTOCONFIG_FILE, myClassLoader, updateStatus);
-        if (url != null) {
-            return url;
-        }
-        // logback-test.xml没找到，最后找logback.xml
-        return getResource(AUTOCONFIG_FILE, myClassLoader, updateStatus);
-    }
-```
-
-小结：
-编译期间，完成slf4j的绑定已经logback配置文件的加载。slf4j会在classpath中寻找org/slf4j/impl/StaticLoggerBinder.class(会在具体的日志框架如log4j、logback等中存在)，找到并完成绑定；同时，logback也会在classpath中寻找配置文件，先找logback.configurationFile、没有则找logback.groovy，若logback.groovy也没有，则找logback-test.xml，若logback-test.xml还是没有，则找logback.xml，若连logback.xml也没有，那么说明没有配置logback的配置文件，那么logback则会启用默认的配置(日志信息只会打印在控制台)。
-
-
-
-四、使用步骤
-1.引入slf4j、logback相关依赖
+### 引入slf4j、logback相关依赖
 
 ```pom
     <!-- slf4j -->
@@ -157,8 +79,7 @@ Slf4j：简单日志门面(Simple Logging Facade for Java)，不是具体的日�
     </dependency>
 ```
 
-2.添加配置文件logback.xm
-
+### 添加配置文件logback.xm
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -317,25 +238,103 @@ Slf4j：简单日志门面(Simple Logging Facade for Java)，不是具体的日�
 </configuration>
 ```
 
-五、实际应用
-就举例最近新做的项目弹个X中的应用吧。因为在与前端联调阶段，api自测感觉没啥问题的，然后联调就会有各种问题，没法避免，技术还是太水了，哈哈哈哈........
-调详情页的时候，听到有问题就赶紧看日志去，果然报错了。如下:
+### logback对配置文件的加载
 
+```java
+1. getSingleton()方法获取logback实例对象，说明在对象之前已经加载了相关的配置文件，跟进 StaticLoggerBinder
+    static {
+        // 初始化
+        SINGLETON.init();
+    }
 
+    private boolean initialized = false;
+    private LoggerContext defaultLoggerContext = new LoggerContext();
+    private final ContextSelectorStaticBinder contextSelectorBinder = ContextSelectorStaticBinder.getSingleton();
 
+    private StaticLoggerBinder() {
+        defaultLoggerContext.setName(CoreConstants.DEFAULT_CONTEXT_NAME);
+    }
 
-## 为什么使用logback
+    public static StaticLoggerBinder getSingleton() {
+        return SINGLETON;
+    }
+    
+2. 查看 init()
+    /**
+     * Package access for testing purposes.
+     */
+    void init() {
+        try {
+            try {
+                // 上下文初始化环境 
+                new ContextInitializer(defaultLoggerContext).autoConfig();
+            } catch (JoranException je) {
+                Util.report("Failed to auto configure default logger context", je);
+            }
+            // logback-292
+            if (!StatusUtil.contextHasStatusListener(defaultLoggerContext)) {
+                StatusPrinter.printInCaseOfErrorsOrWarnings(defaultLoggerContext);
+            }
+            contextSelectorBinder.init(defaultLoggerContext, KEY);
+            initialized = true;
+        } catch (Throwable t) {
+            // we should never get here
+            Util.report("Failed to instantiate [" + LoggerContext.class.getName() + "]", t);
+        }
+    }
+    
+3. 跟进autoConfig()
+    public void autoConfig() throws JoranException {
+        StatusListenerConfigHelper.installIfAsked(loggerContext);
+        // 寻找默认配置文件
+        URL url = findURLOfDefaultConfigurationFile(true);
+        if (url != null) {
+            configureByResource(url);
+        } else {
+            Configurator c = EnvUtil.loadFromServiceLoader(Configurator.class);
+            if (c != null) {
+                try {
+                    c.setContext(loggerContext);
+                    c.configure(loggerContext);
+                } catch (Exception e) {
+                    throw new LogbackException(String.format("Failed to initialize Configurator: %s using ServiceLoader", c != null ? c.getClass()
+                                    .getCanonicalName() : "null"), e);
+                }
+            } else {
+                // 没有找到配置文件，则使用默认的配置器，那么日志只会打印在控制台
+                BasicConfigurator basicConfigurator = new BasicConfigurator();
+                basicConfigurator.setContext(loggerContext);
+                basicConfigurator.configure(loggerContext);
+            }
+        }
+    }
+    
+4. findURLOfDefaultConfigurationFile() logback配置文件加载规则
+    public URL findURLOfDefaultConfigurationFile(boolean updateStatus) {
+        // 获取当前实例的类加载器，目的是在classpath下寻找配置文件
+        ClassLoader myClassLoader = Loader.getClassLoaderOfObject(this);
+        // 先找logback.configurationFile文件
+        URL url = findConfigFileURLFromSystemProperties(myClassLoader, updateStatus);
+        if (url != null) {
+            return url;
+        }
+        // logback.configurationFile文件没找到，再找logback.groovy
+        url = getResource(GROOVY_AUTOCONFIG_FILE, myClassLoader, updateStatus);
+        if (url != null) {
+            return url;
+        }
+        // logback.groovy没找到，再找logback-test.xml
+        url = getResource(TEST_AUTOCONFIG_FILE, myClassLoader, updateStatus);
+        if (url != null) {
+            return url;
+        }
+        // logback-test.xml没找到，最后找logback.xml
+        return getResource(AUTOCONFIG_FILE, myClassLoader, updateStatus);
+    }
+```
 
-logback具有以下优点：
-
-内核重写、测试充分、初始化内存加载更小，这一切让logback性能和log4j相比有诸多倍的提升
-logback非常自然地直接实现了slf4j，这个严格来说算不上优点，只是这样，再理解slf4j的前提下会很容易理解logback，也同时很容易用其他日志框架替换logbac
-logback有比较齐全的200多页的文档
-logback当配置文件修改了，支持自动重新加载配置文件，扫描过程快且安全，它并不需要另外创建一个扫描线程
-支持自动去除旧的日志文件，可以控制已经产生日志文件的最大数量
-总而言之，如果大家的项目里面需要选择一个日志框架，那么我个人非常建议使用logback。
-
-
+小结：
+编译期间，完成slf4j的绑定已经logback配置文件的加载。slf4j会在classpath中寻找org/slf4j/impl/StaticLoggerBinder.class(会在具体的日志框架如log4j、logback等中存在)，找到并完成绑定；同时，logback也会在classpath中寻找配置文件，先找logback.configurationFile、没有则找logback.groovy，若logback.groovy也没有，则找logback-test.xml，若logback-test.xml还是没有，则找logback.xml，若连logback.xml也没有，那么说明没有配置logback的配置文件，那么logback则会启用默认的配置(日志信息只会打印在控制台)。
 
 
 
@@ -350,4 +349,6 @@ logback当配置文件修改了，支持自动重新加载配置文件，扫描�
 </configuration>   
 ```
 
-相关链接: logback最佳实践 https://www.jianshu.com/p/b3dedb8fb61e
+### 相关链接
+
+logback最佳实践 https://www.jianshu.com/p/b3dedb8fb61e

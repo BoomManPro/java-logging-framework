@@ -8,8 +8,10 @@
 * [Spring Boot Logging](spring-boot/README.md)
     * [logback](spring-boot/logback.md)
     * [log4j2](spring-boot/log4j2.md)
+    * [slf4j+Logback](spring-boot/slf4j+Logback.md)
 
 * [日志规范](standard/README.md)
+* [Java日志平台](logging-platform/README.md)
 * [扩展资料](extend/README.md)
     * [Java历史](extend/java-history.md)
     * [alibaba-p3c](extend/alibaba-p3c.md)

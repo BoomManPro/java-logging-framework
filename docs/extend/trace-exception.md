@@ -2,7 +2,7 @@
 
 Tencent 接口一般会有RequestId,能否借鉴
 
-ThreadLocal
+ThreadLocal + Interceptor 进行处理
 
 ## 前端日志
 
@@ -13,7 +13,9 @@ ThreadLocal
 
 我们需要对java服务做监控
 
-Spring boot Admin  (接下来做一个演示)
+Spring boot Admin 
+
+Github Link:[spring-boot-admin-sample](https://github.com/BoomManPro/spring-boot-admin-sample.git)
 
 只要是单机就会出现问题,搭建集群
 
@@ -23,7 +25,7 @@ subscription 打印80g，内存爆掉了。是不是需要一个清理策略
 
 按照体积去分割 按照数量去限制
 
-maxHistory
+配置 maxHistory
 
 ## 日志的格式
 
@@ -49,25 +51,13 @@ df -lh
 
 find . -type f -size +800M  -print0 | xargs -0 du -h | sort -nr
 
-## Tomcat日志
-
-日志框架对比图
-
-
-## 所有日志依赖处理图
-
-核心处理思路
 
 
 ## application.yml
 
-application.yml
+application.yml 与 xml 配置
 
-xml 配置
-
-spring boot debug  为什么就起作用了? 具体包的级别变为debug
-
-他们之间的关系是什么
+spring boot debug  为什么就起作用了? 实际将具体包的级别变为debug 把日志加载的级别变为debug即可
 
 
 ## MongoDB  ElasticSearch Mysql
@@ -83,38 +73,15 @@ logger name 配置成包名即可 实战一下。
 当我们在开发过程中遇到了一些关于依赖的bug 可以如上处理
 
 
-
-## Spring Boot debug:true
-
-
-
-
-## 相关插件推荐
-
-Atl + m
-
-String Manipulation //  Alt+m  字符串日常开发中经常用到的，但是不同的字符串类型在不同的地方可能有一些不同的规则，比如类名要用驼峰形式、常量需要全部大写等，有时候还需要进行编码解码等。这里推荐一款强大的字符串转换工具——String Manipulation
-
-
-Maven Helper
-
-让maven自动处理依赖冲突，还是我们自己解决
-
-
-
-
-
+## JPA 打印sql参数内容
 
 事例 当将项目部署到目标服务器后，执行查询没有结果
 
-## JPA 打印sql参数内容
 ```
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="trace" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 ```
-
-## Appender
 
 
 
@@ -129,6 +96,14 @@ String.format()
 
 linux 搜索日志
 
-## 日志配置在哪里
 
-logback-spring.xml
+## 相关插件推荐
+
+Atl + m
+
+String Manipulation //  Alt+m  字符串日常开发中经常用到的，但是不同的字符串类型在不同的地方可能有一些不同的规则，比如类名要用驼峰形式、常量需要全部大写等，有时候还需要进行编码解码等。这里推荐一款强大的字符串转换工具——String Manipulation
+
+
+Maven Helper
+
+让maven自动处理依赖冲突，还是我们自己解决
