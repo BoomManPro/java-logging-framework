@@ -1,17 +1,22 @@
 <!-- docs/_sidebar.md -->
 * [项目简介](README.md)
-* [Java 日志简介](java/jul.md)
-* [Spring Boot集成](spring-boot/README.md)
+    * [项目日志](overview/project-logging.md)
+    * [日志价值](overview/logging-effect.md)
+    * [使用困惑](overview/logging-problem.md)
+    * [日志历史](overview/java-logging-history.md)
+* [Java Util Logging](java/jul.md)
+* [Spring Boot Logging](spring-boot/README.md)
     * [logback](spring-boot/logback.md)
     * [log4j2](spring-boot/log4j2.md)
-    * [ELK](spring-boot/elk.md)
+
+* [日志规范](standard/README.md)
 * [扩展资料](extend/README.md)
     * [Java历史](extend/java-history.md)
     * [alibaba-p3c](extend/alibaba-p3c.md)
     * [spring-boot](extend/spring-boot.md)
     * [异常跟踪](extend/trace-exception.md)
-    * [日志规范](extend/logging-standard.md)
-* [个人介绍](personal/README.md)
+    * [ELK](extend/elk.md)
+
 
 - **Links**
 - [![Person Page](https://icongr.am/entypo/home.svg?size=16&color=808080)Person Page](http://www.boommanpro.cn/)
