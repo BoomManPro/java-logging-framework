@@ -85,16 +85,19 @@ logger name 配置成包名即可 实战一下。
 
 
 
-## 类似SLF4J的功能
+## 类似SLF4J的功能 输出格式化
 
 
-填充0
+**数字填充0**
 String.format()
+```java
+String.format("%03d", i)
+```
 
 
 ## 日志信息搜索
 
-linux 搜索日志
+linux 搜索日志  grep
 
 
 ## 相关插件推荐
