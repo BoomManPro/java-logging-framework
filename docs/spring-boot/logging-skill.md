@@ -4,6 +4,8 @@
 
 - 动态日志级别修改<SetLogLevel>
 
+- 日志滚动设置<rollingPolicy>
+
 ## Log打印请求id
 
 
@@ -174,7 +176,7 @@ public enum ResultCode {
 
 ## 动态日志级别修改
 
-```
+```java
     @GetMapping("changeLogLevelToInfo")
     public ResultVo<Boolean> changeLogLevelToInfo() {
         LoggerContext loggerContext = ((LoggerContext) LoggerFactory.getILoggerFactory());
@@ -197,4 +199,143 @@ public enum ResultCode {
         log.debug("debug日志级别测试打印 date:[{}]", LocalDate.now());
         return ResultVo.success();
     }
+```
+
+## 日志滚动设置
+
+config 配置:
+
+logback-spring.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration files in general,                    -->
+<!--    please contact the logback user mailing list at http://www.qos.ch/mailman/listinfo/logback-user -->
+<!-- For professional support please see http://www.qos.ch/shop/products/professionalSupport            -->
+<configuration scan="true" scanPeriod="30 seconds">
+    <!-- 引入平台公共的日志配置 配置了info和error-->
+    <include resource="logging/logback-initial.xml"/>
+</configuration>
+```
+
+logging/logging-base.xml
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration files in general,                    -->
+<!--    please contact the logback user mailing list at http://www.qos.ch/mailman/listinfo/logback-user -->
+<!-- For professional support please see http://www.qos.ch/shop/products/professionalSupport            -->
+<!-- Base logback configuration provided for compatibility with ecsplatform like Spring boot.           -->
+<included>
+
+    <!--应用名称-->
+    <property name="web-app_name" value="tomato-admin"/>
+    <!--日志字符集-->
+    <property name="char_set_encoding" value="UTF-8"/>
+    <!--日志根目录-->
+    <property name="file_log_base_home" value="logs"/>
+    <!--历史根目录-->
+    <property name="file_log_app_history_home" value="${file_log_base_home}/history"/>
+
+    <property name="logger_additivity" value="false"/>
+
+    <!--文件日志通用的格式，最多输出 30 字符-->
+    <property name="file_log_pattern_30" value="[%d{yyyy-MM-dd HH:mm:ss}]:%5p %-30.30logger{29}:%L -- %m%n"/>
+    <!--文件日志通用的格式，最多输出 30 字符-->
+    <property name="file_log_pattern_40" value="[%d{yyyy-MM-dd HH:mm:ss}]:%5p %-40.40logger{39}:%L -- %m%n"/>
+    <!--文件日志通用的格式，最多输出 50 字符-->
+    <property name="file_log_pattern_50" value="[%d{yyyy-MM-dd HH:mm:ss}]:%5p %-50.50logger{49}:%L -- %m%n"/>
+    <!--文件日志通用的格式，最多输出 60 字符-->
+    <property name="file_log_pattern" value="[%d{yyyy-MM-dd HH:mm:ss}]:%5p %-60.60logger{59}:%L -- %m%n"/>
+
+    <!--spring 日志基础配置-->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <!--spring 控制台日志相关配置-->
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+
+    <!-- Console 输出设置 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{yyyy-MM-dd HH:mm:ss} [%X{traceId}]  | %highlight(%-5level) | %boldYellow(%thread) | %boldGreen(%logger) | %msg%n   </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+</included>
+```
+
+logging/logging-initial.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration files in general,                    -->
+<!--    please contact the logback user mailing list at http://www.qos.ch/mailman/listinfo/logback-user -->
+<!-- For professional support please see http://www.qos.ch/shop/products/professionalSupport            -->
+<!-- Base logback configuration provided for compatibility with ecsplatform like Spring boot.           -->
+<included>
+
+    <!--初始化-预制的日志appender-->
+    <include resource="logging/logback-base.xml"/>
+
+    <appender name="infoFileOutput" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${file_log_base_home}/info.log</File>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${file_log_app_history_home}/info_%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>info:${file_log_pattern}</pattern>
+            <charset>${char_set_encoding}</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="errorFileOutput" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <!--        滚动策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>${file_log_app_history_home}/error_%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+            <!--日志文件最大的大小-->
+            <MaxFileSize>5MB</MaxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>error:${file_log_pattern}</pattern>
+            <charset>${char_set_encoding}</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+
+    <springProfile name="default">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="infoFileOutput"/>
+            <appender-ref ref="errorFileOutput"/>
+        </root>
+
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="trace" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+    </springProfile>
+
+
+</included>
 ```
