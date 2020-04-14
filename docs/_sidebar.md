@@ -9,6 +9,7 @@
     * [logback](spring-boot/logback.md)
     * [log4j2](spring-boot/log4j2.md)
     * [slf4j+Logback](spring-boot/slf4j+Logback.md)
+    * [logging skill](spring-boot/logging-skill.md)
 
 * [日志规范](standard/README.md)
 * [Java日志平台](logging-platform/README.md)
