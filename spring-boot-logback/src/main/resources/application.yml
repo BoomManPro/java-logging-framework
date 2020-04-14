@@ -3,9 +3,12 @@
 
 
 
-## 通过application.yml配置日志
+# 通过application.yml配置日志
 logging:
   path: /
   file: spring.log
   level:
     root: info
+    cn.boommanpro.springbootlogback: debug
+
+debug: true

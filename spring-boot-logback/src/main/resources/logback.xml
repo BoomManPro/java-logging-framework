@@ -1,6 +1,6 @@
-<configuration>
+<configuration debug="false">
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
@@ -9,26 +9,28 @@
     </appender>
 
 
-<!--    <appender name="logstash"-->
-<!--              class="net.logstash.logback.appender.LogstashAccessTcpSocketAppender">-->
-<!--        <destination>127.0.0.1:8888</destination>-->
-<!--        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
-<!--            <providers>-->
-<!--                <timestamp/>-->
-<!--                <version/>-->
-<!--                <message/>-->
-<!--                <loggerName/>-->
-<!--                <threadName/>-->
-<!--                <logLevel/>-->
-<!--                <callerData/>-->
-<!--            </providers>-->
-<!--        </encoder>-->
-<!--    </appender>-->
 
+    <!--    <appender name="logstash"-->
+    <!--              class="net.logstash.logback.appender.LogstashAccessTcpSocketAppender">-->
+    <!--        <destination>127.0.0.1:8888</destination>-->
+    <!--        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
+    <!--            <providers>-->
+    <!--                <timestamp/>-->
+    <!--                <version/>-->
+    <!--                <message/>-->
+    <!--                <loggerName/>-->
+    <!--                <threadName/>-->
+    <!--                <logLevel/>-->
+    <!--                <callerData/>-->
+    <!--            </providers>-->
+    <!--        </encoder>-->
+    <!--    </appender>-->
 
-    <root level="trace">
-        <appender-ref ref="STDOUT" />
+    <logger level="debug" name="cn.boommanpro.springbootlogback" additivity="false">
+        <appender-ref ref="Console" />
+    </logger>
 
-        <appender-ref ref="logstash"/>
+    <root level="info">
+        <appender-ref ref="Console" />
     </root>
 </configuration>
