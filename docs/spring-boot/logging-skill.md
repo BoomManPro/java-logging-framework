@@ -2,6 +2,8 @@
 
 - Log打印请求跟踪<TraceId>
 
+- 动态日志级别修改<SetLogLevel>
+
 ## Log打印请求id
 
 
@@ -168,4 +170,31 @@ public enum ResultCode {
     }
 }
 
+```
+
+## 动态日志级别修改
+
+```
+    @GetMapping("changeLogLevelToInfo")
+    public ResultVo<Boolean> changeLogLevelToInfo() {
+        LoggerContext loggerContext = ((LoggerContext) LoggerFactory.getILoggerFactory());
+        ch.qos.logback.classic.Logger root = loggerContext.getLogger("root");
+        root.setLevel(Level.INFO);
+        return ResultVo.success(String.format("修改日志为Info级别,status:[%s]", root.isInfoEnabled()), root.isInfoEnabled());
+    }
+
+    @GetMapping("changeLogLevelToDebug")
+    public ResultVo<Boolean> changeLogLevelToDebug() {
+        LoggerContext loggerContext = ((LoggerContext) LoggerFactory.getILoggerFactory());
+        ch.qos.logback.classic.Logger root = loggerContext.getLogger("root");
+        root.setLevel(Level.DEBUG);
+        return ResultVo.success(String.format("修改日志为Info级别,status:[%s]", root.isDebugEnabled()), root.isInfoEnabled());
+    }
+
+    @GetMapping("doLog")
+    public ResultVo<String> doLog() {
+        log.info("info日志级别测试打印 date:[{}]", LocalDate.now());
+        log.debug("debug日志级别测试打印 date:[{}]", LocalDate.now());
+        return ResultVo.success();
+    }
 ```
