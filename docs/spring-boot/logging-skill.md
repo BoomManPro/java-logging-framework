@@ -339,3 +339,12 @@ logging/logging-initial.xml
 
 </included>
 ```
+#### logback的additivity="false" 与root关系
+
+它是 子Logger 是否继承 root的Logger 的 输出源（appender） 的标志位。
+
+具体说，默认情况下子Logger会继承root的Logger的appender，也就是说子Logger会在root的Logger的appender里输出。
+
+1.若是additivity设为false，则子Logger只会在自己的appender里输出，不会在root的logger的appender里输出（个人可以理解为additivity设为false后，子Logger会覆盖掉root的logger）。
+
+2.若是additivity设为true，则子Logger不止会在自己的appender里输出，还会在root的logger的appender里输出
