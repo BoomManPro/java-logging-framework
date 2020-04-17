@@ -2,6 +2,8 @@
 
 - Log打印请求跟踪<TraceId>
 
+- Log打印请求跟踪时异步任务没有TraceId的问题
+
 - 动态日志级别修改<SetLogLevel>
 
 - 日志滚动设置<rollingPolicy>
@@ -173,6 +175,71 @@ public enum ResultCode {
 }
 
 ```
+## @Async 异步任务TraceId打印
+
+MdcTaskDecorator.java
+```java
+import java.util.Map;
+
+import org.slf4j.MDC;
+import org.springframework.core.task.TaskDecorator;
+
+/**
+ * @author wangqimeng
+ * @date 2020/4/17 9:39
+ */
+public class MdcTaskDecorator implements TaskDecorator {
+    @Override
+    public Runnable decorate(Runnable runnable) {
+        // Right now: Web thread context !
+        // (Grab the current thread MDC data)
+        Map<String, String> contextMap = MDC.getCopyOfContextMap();
+        return () -> {
+            try {
+                // Right now: @Async thread context !
+                // (Restore the Web thread context's MDC data)
+                MDC.setContextMap(contextMap);
+                runnable.run();
+            } finally {
+                MDC.clear();
+            }
+        };
+    }
+}
+```
+
+AsyncConfiguration.java
+
+```java
+import java.util.concurrent.Executor;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+/**
+ * @author wangqimeng
+ * @date 2020/4/17 9:43
+ */
+@Configuration
+public class AsyncConfiguration  {
+
+    @Bean
+    public Executor executor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setThreadNamePrefix("default-async-");
+        executor.setMaxPoolSize(10);
+        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setCorePoolSize(5);
+        executor.initialize();
+        return executor;
+    }
+
+
+}
+
+```
+
 
 ## 动态日志级别修改
 
@@ -339,6 +406,9 @@ logging/logging-initial.xml
 
 </included>
 ```
+
+
+
 #### logback的additivity="false" 与root关系
 
 它是 子Logger 是否继承 root的Logger 的 输出源（appender） 的标志位。
