@@ -26,4 +26,15 @@
 
 ## Read For Page
 
-Link https://boommanpro.github.io/java-logging-framework/#/
+[Preview Docs Link](https://boommanpro.github.io/java-logging-framework/#/)
+
+## Run At Docs
+
+确保本地已经安装 [docsify](https://docsify.js.org/#/)
+
+```
+git clone https://github.com/BoomManPro/java-logging-framework.git
+
+docsify serve docs
+
+```

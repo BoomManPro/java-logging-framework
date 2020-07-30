@@ -1,8 +1,9 @@
-## 在项目中如何跟踪异常信息
+# 异常跟踪
 
-Tencent 接口一般会有RequestId,能否借鉴
-
-ThreadLocal + Interceptor 进行处理
+1. 项目中请求+异常跟踪 (Http Async)
+2. Java服务监控
+3. 日志策略
+4. 前端日志跟踪
 
 ## 前端日志
 

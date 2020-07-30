@@ -8,6 +8,8 @@
 
 - 日志滚动设置<rollingPolicy>
 
+- 单体项目 外部化刷新日志配置
+
 ## Log打印请求id
 
 
@@ -307,29 +309,24 @@ logging/logging-base.xml
 
     <property name="logger_additivity" value="false"/>
 
-    <!--文件日志通用的格式，最多输出 30 字符-->
-    <property name="file_log_pattern_30" value="[%d{yyyy-MM-dd HH:mm:ss}]:%5p %-30.30logger{29}:%L -- %m%n"/>
-    <!--文件日志通用的格式，最多输出 30 字符-->
-    <property name="file_log_pattern_40" value="[%d{yyyy-MM-dd HH:mm:ss}]:%5p %-40.40logger{39}:%L -- %m%n"/>
-    <!--文件日志通用的格式，最多输出 50 字符-->
-    <property name="file_log_pattern_50" value="[%d{yyyy-MM-dd HH:mm:ss}]:%5p %-50.50logger{49}:%L -- %m%n"/>
-    <!--文件日志通用的格式，最多输出 60 字符-->
-    <property name="file_log_pattern" value="[%d{yyyy-MM-dd HH:mm:ss}]:%5p %-60.60logger{59}:%L -- %m%n"/>
+    <!--文件日志通用的格式-->
+    <property name="file_log_pattern" value="%date{yyyy-MM-dd HH:mm:ss} [%X{traceId}] [%X{nextId}] | %highlight(%-5level) | %boldYellow(%thread) | %boldGreen(%logger) | %msg%n   "/>
+    <!--控制台输出格式-->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(%-60.60logger{59}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
 
     <!--spring 日志基础配置-->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <!--spring 控制台日志相关配置-->
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-
     <!-- Console 输出设置 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date{yyyy-MM-dd HH:mm:ss} [%X{traceId}]  | %highlight(%-5level) | %boldYellow(%thread) | %boldGreen(%logger) | %msg%n   </pattern>
+            <pattern>${file_log_pattern}</pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-
 </included>
 ```
 
@@ -418,3 +415,35 @@ logging/logging-initial.xml
 1.若是additivity设为false，则子Logger只会在自己的appender里输出，不会在root的logger的appender里输出（个人可以理解为additivity设为false后，子Logger会覆盖掉root的logger）。
 
 2.若是additivity设为true，则子Logger不止会在自己的appender里输出，还会在root的logger的appender里输出
+
+
+## 单体项目 外部化刷新日志配置
+
+在项目代码中我们会写很多日志( debug,info,error)等。在项目正常运行的时候,我们不会打印debug级别的日志.一般项目上生产环境后是 info级别。
+当发生错误,或者需要定位问题时,我们需要把日志级别调整为debug级别 or trace级别。方便更好定位问题。
+
+[Logback Configuration](http://logback.qos.ch/manual/configuration.html)
+
+1. 配置定时获取外部化配置信息
+
+这里的include可以是file,resource,url等等. 所以如果我们配置成url,理论可以搞定集群化的问题。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration files in general,                    -->
+<!--    please contact the logback user mailing list at http://www.qos.ch/mailman/listinfo/logback-user -->
+<!-- For professional support please see http://www.qos.ch/shop/products/professionalSupport            -->
+<configuration scan="true" scanPeriod="1 seconds">
+    <!-- 引入平台公共的日志配置 配置了info和error-->
+    <include resource="logging/logback-initial.xml"/>
+    <!---->
+    <include optional="true" file="config/logging-config.xml"/>
+</configuration>
+```
+
+如果使用springProfile来隔离不同环境(生产,测试,开发)等.
+
+我们使用外部化的配置如 `<include optional="true" file="config/logging-config.xml"/>` 来reload配置.
+
+注意配置 -> 基础配置不要有生产的配置,否则会打印多次.
