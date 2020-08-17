@@ -397,7 +397,8 @@ logback-spring.xml
 <!-- For professional support please see http://www.qos.ch/shop/products/professionalSupport            -->
 <configuration scan="true" scanPeriod="30 seconds">
     <!-- 引入平台公共的日志配置 配置了info和error-->
-    <include resource="logging/logback-initial.xml"/>
+     <include resource="logging/logging-initial.xml"/>
+     <include optional="true" file="logging/logging-external.xml"/>
 </configuration>
 ```
 
@@ -412,7 +413,7 @@ logging/logging-base.xml
 <included>
 
     <!--应用名称-->
-    <property name="web-app_name" value="java-logging-framework"/>
+    <property name="web-app_name" value="web-demo"/>
     <!--日志字符集-->
     <property name="char_set_encoding" value="UTF-8"/>
     <!--日志根目录-->
@@ -441,6 +442,7 @@ logging/logging-base.xml
         </encoder>
     </appender>
 </included>
+
 ```
 
 logging/logging-initial.xml
@@ -464,7 +466,7 @@ logging/logging-initial.xml
             <fileNamePattern>${file_log_app_history_home}/info_%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
-            <pattern>info:${file_log_pattern}</pattern>
+            <pattern>${file_log_pattern}</pattern>
             <charset>${char_set_encoding}</charset>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -486,7 +488,7 @@ logging/logging-initial.xml
             <MaxFileSize>5MB</MaxFileSize>
         </rollingPolicy>
         <encoder>
-            <pattern>error:${file_log_pattern}</pattern>
+            <pattern>${file_log_pattern}</pattern>
             <charset>${char_set_encoding}</charset>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -549,9 +551,9 @@ logging/logging-initial.xml
 <!-- For professional support please see http://www.qos.ch/shop/products/professionalSupport            -->
 <configuration scan="true" scanPeriod="1 seconds">
     <!-- 引入平台公共的日志配置 配置了info和error-->
-    <include resource="logging/logback-initial.xml"/>
-    <!---->
-    <include optional="true" file="config/logging-config.xml"/>
+    <include resource="logging/logging-initial.xml"/>
+    <!--日志外部化配置-->
+    <include optional="true" file="logging/logging-external.xml"/>
 </configuration>
 ```
 
