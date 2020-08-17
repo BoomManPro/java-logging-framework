@@ -32,6 +32,9 @@
 
 确保本地已经安装 [docsify](https://docsify.js.org/#/)
 
+install docsify -> `npm i docsify-cli -g` 
+
+
 ```
 git clone https://github.com/BoomManPro/java-logging-framework.git
 

@@ -13,7 +13,11 @@
 ## Log打印请求id
 
 
+TraceConfig 工具类
+
 ```java
+
+import java.util.UUID;
 
 /**
  * @author wangqimeng
@@ -23,18 +27,28 @@ public class TraceConfig {
 
     public static final String TRACE_STRING = "traceId";
 
+    public static final String NEXT_STRING = "nextId";
+
+    public static String randomId(){
+         return UUID.randomUUID().toString().replace("-", "");
+    }
+
     private TraceConfig() {
     }
 }
 
 ```
 
+TraceLogFilter -> 通过Filter添加请求跟踪
+
 ```java
 
+import cn.boommanpro.tomato.common.TraceConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -51,17 +65,19 @@ public class TraceLogFilter implements Filter {
 
     }
 
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        MDC.put(TraceConfig.TRACE_STRING, UUID.randomUUID().toString().replace("-", ""));
+        HttpServletRequest req = (HttpServletRequest) request;
+        MDC.put(TraceConfig.TRACE_STRING, req.getRequestURI());
+        MDC.put(TraceConfig.NEXT_STRING, TraceConfig.randomId());
         chain.doFilter(request, response);
     }
 }
 
+
 ```
 
-控制台输出:
+控制台输出格式:
 
 ```xml
     <!-- Console 输出设置 -->
@@ -73,7 +89,7 @@ public class TraceLogFilter implements Filter {
     </appender>
 ```
 
-前端处理:
+ResultVo前端处理:
 ``` java
 
 import lombok.Data;
@@ -101,7 +117,7 @@ public class ResultVo<T> {
         this.showMsg = showMsg;
         this.errorMsg = errorMsg;
         this.data = data;
-        this.traceId = MDC.get(TraceConfig.TRACE_STRING);
+        this.traceId = MDC.get(TraceConfig.NEXT_STRING);
     }
 
     public static <T> ResultVo<T> success() {
@@ -123,7 +139,10 @@ public class ResultVo<T> {
 }
 
 ```
-ResultCode
+
+
+ResultCode 示例
+
 ```java
 import lombok.Getter;
 
@@ -181,8 +200,11 @@ public enum ResultCode {
 
 MdcTaskDecorator.java
 ```java
+import java.util.HashMap;
 import java.util.Map;
 
+import cn.boommanpro.tomato.common.TraceConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.core.task.TaskDecorator;
 
@@ -190,7 +212,9 @@ import org.springframework.core.task.TaskDecorator;
  * @author wangqimeng
  * @date 2020/4/17 9:39
  */
+@Slf4j
 public class MdcTaskDecorator implements TaskDecorator {
+
     @Override
     public Runnable decorate(Runnable runnable) {
         // Right now: Web thread context !
@@ -198,10 +222,21 @@ public class MdcTaskDecorator implements TaskDecorator {
         Map<String, String> contextMap = MDC.getCopyOfContextMap();
         return () -> {
             try {
+                if (contextMap != null) {
+                    contextMap.put(TraceConfig.TRACE_STRING, contextMap.get(TraceConfig.NEXT_STRING));
+                    contextMap.put(TraceConfig.NEXT_STRING, TraceConfig.randomId());
+                    MDC.setContextMap(contextMap);
+                } else {
+                    Map<String, String> map = new HashMap<>();
+                    map.put(TraceConfig.TRACE_STRING, "未知入口");
+                    map.put(TraceConfig.NEXT_STRING, TraceConfig.randomId());
+                    MDC.setContextMap(map);
+                }
                 // Right now: @Async thread context !
                 // (Restore the Web thread context's MDC data)
-                MDC.setContextMap(contextMap);
                 runnable.run();
+            } catch (Exception e) {
+                log.error("异步任务异常:", e);
             } finally {
                 MDC.clear();
             }
@@ -213,11 +248,6 @@ public class MdcTaskDecorator implements TaskDecorator {
 AsyncConfiguration.java
 
 ```java
-import java.util.concurrent.Executor;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * @author wangqimeng
@@ -229,7 +259,7 @@ public class AsyncConfiguration  {
     @Bean
     public Executor executor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("default-async-");
+        executor.setThreadNamePrefix("executor-async-");
         executor.setMaxPoolSize(10);
         executor.setTaskDecorator(new MdcTaskDecorator());
         executor.setCorePoolSize(5);
@@ -237,7 +267,90 @@ public class AsyncConfiguration  {
         return executor;
     }
 
+    @Bean
+    public Executor generatorExecutor(){
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setThreadNamePrefix("generator-async-");
+        executor.setMaxPoolSize(10);
+        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setCorePoolSize(5);
+        executor.initialize();
+        return executor;
+    }
 
+    @Bean
+    public Executor taskScheduler() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setThreadNamePrefix("task-async-");
+        executor.setMaxPoolSize(10);
+        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.setCorePoolSize(5);
+        executor.initialize();
+        return executor;
+
+    }
+
+
+}
+
+
+```
+
+定时任务日志打印
+
+```java
+import cn.boommanpro.tomato.common.TraceConfig;
+import cn.boommanpro.tomato.taskschedule.config.annotation.ScheduleDes;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+
+/**
+ * @author wangqimeng
+ * @date 2020/4/28 20:21
+ */
+@Slf4j
+@Aspect
+@Component
+public class ScheduledAspect {
+
+    /**
+     * aop {@link org.springframework.scheduling.annotation.Scheduled}
+     */
+    @Pointcut(value = "@annotation(org.springframework.scheduling.annotation.Scheduled)")
+    public void pointcut() {
+    }
+
+    @Around("pointcut()")
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+        long start = System.currentTimeMillis();
+        Object result;
+        String des = getDes(joinPoint);
+        MDC.put(TraceConfig.TRACE_STRING, des);
+        MDC.put(TraceConfig.NEXT_STRING, TraceConfig.randomId());
+        try {
+            log.info("[{}] 任务 -> start at {}", des, joinPoint.getSignature());
+            result = joinPoint.proceed();
+            return result;
+        } catch (Exception e) {
+            log.error(String.format("[%s] 出现异常:", des), e);
+            return null;
+        } finally {
+            log.info("[{}] 任务 -> end , cost [{}]", des, System.currentTimeMillis() - start);
+            MDC.clear();
+        }
+    }
+
+    private String getDes(ProceedingJoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        ScheduleDes annotation = signature.getMethod().getAnnotation(ScheduleDes.class);
+        return annotation == null ? "定时任务..." : annotation.value();
+    }
 }
 
 ```
@@ -299,7 +412,7 @@ logging/logging-base.xml
 <included>
 
     <!--应用名称-->
-    <property name="web-app_name" value="tomato-admin"/>
+    <property name="web-app_name" value="java-logging-framework"/>
     <!--日志字符集-->
     <property name="char_set_encoding" value="UTF-8"/>
     <!--日志根目录-->
@@ -342,7 +455,7 @@ logging/logging-initial.xml
 <included>
 
     <!--初始化-预制的日志appender-->
-    <include resource="logging/logback-base.xml"/>
+    <include resource="logging/logging-base.xml"/>
 
     <appender name="infoFileOutput" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>${file_log_base_home}/info.log</File>
