@@ -78,7 +78,13 @@ logger name 配置成包名即可 实战一下。
 
 事例 当将项目部署到目标服务器后，执行查询没有结果
 
+
+
 ```
+    <logger name="org.hibernate.SQL" level="trace" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="trace" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
