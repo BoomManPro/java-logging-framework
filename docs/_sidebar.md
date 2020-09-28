@@ -13,6 +13,7 @@
 
 * [日志规范](standard/README.md)
 * [Java日志平台](logging-platform/README.md)
+    * [单体项目日志实战](logging-platform/in-action.md)
 * [扩展资料](extend/README.md)
     * [Java历史](extend/java-history.md)
     * [alibaba-p3c](extend/alibaba-p3c.md)
